@@ -91,6 +91,7 @@ class Client(object):
             msg, func_id = self.gen_msg_py2(content)
         try:
             self.session = requests.Session()
+            self.session.verify = False
             res = self.session.post(self.url, data=msg, headers=self.headers, timeout=self.timeout)
             if res:
                 symbol_dict[func_id] = self.get_func_symbol(res.text)
@@ -133,7 +134,7 @@ class FuncSigFeature:
 
     def get_file_structure(self):
         info = idaapi.get_inf_structure()
-        arch = info.procName
+        arch = info.procname
         if info.is_be():
             endian = "MSB"
         else:
@@ -345,7 +346,7 @@ class FingerManager:
         pfn = idaapi.get_func(ea)
         if pfn:
             func_name = idc.get_func_name(pfn.start_ea)
-            func_symbol = self.recognize_function(pfn.start_ea)
+            func_symbol = self.recognize_selected_function([pfn])
             if func_symbol:
                 idc.set_color(pfn.start_ea, idc.CIC_FUNC, 0x98FF98)
                 idaapi.set_name(pfn.start_ea, func_symbol, idaapi.SN_FORCE)
